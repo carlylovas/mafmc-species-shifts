@@ -300,13 +300,13 @@ dom1      <- list(wave=list(c(1,2,3,4,5,6))) # All waves
 trip1     <- 1 # Primary target
 species <- c("ATLANTIC CROAKER","ATLANTIC MACKEREL","BLACK SEA BASS","SPANISH MACKEREL","STRIPED BASS","SUMMER FLOUNDER")
 
-out <- species |>
-  set_names() |>
-  map(~MRIP.dirtrips(intdir = here("data", "MRIP_Index"), 
-                     common = .x, 
-                     st = mid_atl, styr = 2000, endyr = 2024, trips = trip1))|>
-  data.table::rbindlist(idcol = "species_name", fill = TRUE) |>
-  select(!species_name)
+# out <- species |>
+#   set_names() |>
+#   map(~MRIP.dirtrips(intdir = here("data", "MRIP_Index"), 
+#                      common = .x, 
+#                      st = mid_atl, styr = 2000, endyr = 2024, trips = trip1))|>
+#   data.table::rbindlist(idcol = "species_name", fill = TRUE) |>
+#   select(!species_name)
 
 write_csv(out, here("data", "processed", "mrip_primary_target.csv"))
 
