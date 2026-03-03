@@ -10,9 +10,7 @@ Objective 2: Synthesize species and fishery distribution changes for Mid-Atlanti
 Objective 3: Identify and evaluate potential species and fishery distribution indicators relevant to fisheries governance, and test these indicators with a set of selected species.  
 Objective 4: Develop a framework for continued monitoring and integration of species and fishery distribution indicators into decision-making processes.
 
-# Surveys and visualizations
-[Visualization examples](https://carlylovas.github.io/MAFMC_SpeciesShifts/code/example_viz.html)
-
-[SEAMAP-SA](https://carlylovas.github.io/MAFMC_SpeciesShifts/code/se_summaries.html)
-
-[NMFS Trawl](https://carlylovas.github.io/MAFMC_SpeciesShifts/code/nmfs_trawl.html) 
+# Data and analyses
+The `code` folder contains several subfolders for each respective data set used in this project. Each folder contains the R code needed to pull and clean the data for further analysis.
+All non-confidential data sets are saved out into the `data` folder in the subfolder entitled `processed`. Non-confidential and non-webhosted data are stored in the data subfolder entitled `raw`.
+Shapefiles necessary to complete this analyses are stored within the `shapefile` subfolder of `data`.
