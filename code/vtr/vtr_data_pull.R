@@ -26,9 +26,6 @@ all_vtr |>
   mutate(across(c(year:calc_lon_sec), as.numeric)) |>
   distinct() -> coords
 
-# ggplot() + 
-#   geom_histogram(data = coords, aes(x = calc_lon_deg))
-
 ## Longitude ----
 degrees <- coords |>
   select(year, sub_trip_id, calc_lon_deg) |>
@@ -75,8 +72,8 @@ coords |>
 
 ## Species caught ----
 all_vtr |>
-  filter(trip_type == "COMMERCIAL") |>
-  select(year, sub_trip_id, port_code, gearcode, species_name, kept, discarded) |>
+  # filter(trip_type == "COMMERCIAL") |>
+  select(year, sub_trip_id, trip_type, port_code, gearcode, species_name, kept, discarded) |>
   filter(kept > 0) |>
   distinct() -> species_catch
 
@@ -85,8 +82,8 @@ all_vtr |>
   select(port_code, port_name, state_abb) |>
   distinct() |>
   filter(!is.na(port_code)) |>
-  filter(state_abb %in% c("ME","NH","MA","RI","CT","NY","NJ","MD","DE","VA")) |>
-  mutate(state_abb = factor(state_abb, levels = c("ME","NH","MA","RI","CT","NY","NJ","MD","DE","VA"))) |>
+  filter(state_abb %in% c("ME","NH","MA","RI","CT","NY","NJ","MD","DE","VA","NC","SC","GA","FL")) |>
+  mutate(state_abb = factor(state_abb, levels = c("ME","NH","MA","RI","CT","NY","NJ","MD","DE","VA","NC","SC","GA","FL"))) |>
   arrange(state_abb, port_name) -> locations
 
 ## Clean VTR ----
@@ -95,7 +92,10 @@ species_catch |>
   left_join(locations) |>
   filter(lat > 0) -> clean_vtr
 
-clean_vtr |>
-  filter(is.na(port_name)) |>
-  select(port_code) |>
-  distinct() -> port_nas
+## Save out ----
+write_csv(clean_vtr, here("data","processed","vessel_trip_reports.csv"))
+
+# clean_vtr |>
+#   filter(is.na(port_name)) |>
+#   select(port_code) |>
+#   distinct() -> port_nas
