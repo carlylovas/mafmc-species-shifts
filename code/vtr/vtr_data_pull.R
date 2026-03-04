@@ -1,4 +1,7 @@
 # Pull Vessel Trip Report (VTR data) from confidential repository and clean
+library(here)
+library(tidyverse)
+library(sf)
 
 ## File paths ----
 box_path  <- "/Users/clovas/Library/CloudStorage/Box-Box/"
@@ -72,7 +75,7 @@ coords |>
 
 ## Species caught ----
 all_vtr |>
-  # filter(trip_type == "COMMERCIAL") |>
+  # filter(trip_type == "COMMERCIAL") |> # keeping all trip types for now
   select(year, sub_trip_id, trip_type, port_code, gearcode, species_name, kept, discarded) |>
   filter(kept > 0) |>
   distinct() -> species_catch
@@ -90,12 +93,37 @@ all_vtr |>
 species_catch |>
   left_join(coords |> select(year, sub_trip_id, lat, lon)) |>
   left_join(locations) |>
-  filter(lat > 0) -> clean_vtr
+  mutate(lat = round(lat, digits = 2), # rounding to better calculate density later on
+         lon = round(lon, digits = 2)) |>
+  distinct() |>
+  filter(lat > 20) |>
+  filter(lon > -80 & lon < -60) -> clean_vtr
+
+# Crop to Council zones (removes far outliers)
+sf_use_s2(FALSE)
+
+shp_path <- here("data", "shapefiles", "Council_Scopes.shp")
+
+boundaries <- st_read(shp_path, quiet = TRUE)
+boundaries <- fortify(boundaries)
+
+east_coast <- boundaries |>
+  filter(Council %in% c("New England", "Mid-Atlantic", "South Atlantic")) |>
+  mutate(factor = factor(Council, levels = c("New England", "Mid-Atlantic", "South Atlantic")))
+clean_vtr |>
+  st_as_sf(coords = c("lon","lat"), crs = 4326) -> vtr_sf
+
+vtr_crop <- vtr_sf |>
+  st_join(east_coast, join = st_intersects) 
+  
+vtr_crop |>
+  cbind(st_coordinates(vtr_crop)) |> # convoluted but whatever
+  st_drop_geometry() |>
+  filter(!is.na(Council)) |>
+  rename("lon" = "X",
+         "lat" = "Y") |>
+  select(year, sub_trip_id, trip_type, port_code, gearcode, species_name, lat, lon, kept, discarded, port_name, state_abb, Council) -> vtr_crop
+# Note: in cropping to the management council zones, we lose inshore area coverage. We might be able to remedy this by intersecting with the landmass to filter out any points on land.
 
 ## Save out ----
-write_csv(clean_vtr, here("data","processed","vessel_trip_reports.csv"))
-
-# clean_vtr |>
-#   filter(is.na(port_name)) |>
-#   select(port_code) |>
-#   distinct() -> port_nas
+write_csv(vtr_crop, here("data","processed","vessel_trip_reports.csv"))
