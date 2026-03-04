@@ -127,7 +127,7 @@ all_plots <- maps |>
 # Latitude Accumulation Maps ----
 sf_use_s2(FALSE)
 
-shp_path <- here("data", "council_boundaries", "Council_Scopes.shp")
+shp_path <- here("data", "shapefiles", "Council_Scopes.shp")
 
 boundaries <- st_read(shp_path, quiet = TRUE)
 boundaries <- fortify(boundaries)
