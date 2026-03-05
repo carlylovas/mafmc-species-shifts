@@ -66,3 +66,4 @@ accum_maps <- lat_accum |>
             panel.background = element_rect(fill = "transparent"),
             panel.border = element_rect(fill = "transparent", linetype = 1, linewidth = 0.5, color = "#535353"))
   }))
+

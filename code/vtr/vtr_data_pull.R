@@ -93,8 +93,8 @@ all_vtr |>
 species_catch |>
   left_join(coords |> select(year, sub_trip_id, lat, lon)) |>
   left_join(locations) |>
-  mutate(lat = round(lat, digits = 2), # rounding to better calculate density later on
-         lon = round(lon, digits = 2)) |>
+  # mutate(lat = round(lat, digits = 2), # rounding to better calculate density later on
+  #        lon = round(lon, digits = 2)) |>
   distinct() |>
   filter(lat > 20) |>
   filter(lon > -80 & lon < -60) -> clean_vtr
@@ -109,13 +109,14 @@ boundaries <- fortify(boundaries)
 
 east_coast <- boundaries |>
   filter(Council %in% c("New England", "Mid-Atlantic", "South Atlantic")) |>
-  mutate(factor = factor(Council, levels = c("New England", "Mid-Atlantic", "South Atlantic")))
+  mutate(factor = factor(Council, levels = c("New England", "Mid-Atlantic", "South Atlantic"))) 
+
 clean_vtr |>
-  st_as_sf(coords = c("lon","lat"), crs = 4326) -> vtr_sf
+  st_as_sf(coords = c("lon","lat"), crs = st_crs(east_coast)) -> vtr_sf
 
 vtr_crop <- vtr_sf |>
-  st_join(east_coast, join = st_intersects) 
-  
+  st_join(east_coast, join = st_intersects)
+
 vtr_crop |>
   cbind(st_coordinates(vtr_crop)) |> # convoluted but whatever
   st_drop_geometry() |>
@@ -123,7 +124,8 @@ vtr_crop |>
   rename("lon" = "X",
          "lat" = "Y") |>
   select(year, sub_trip_id, trip_type, port_code, gearcode, species_name, lat, lon, kept, discarded, port_name, state_abb, Council) -> vtr_crop
-# Note: in cropping to the management council zones, we lose inshore area coverage. We might be able to remedy this by intersecting with the landmass to filter out any points on land.
 
+# Note: in cropping to the management council zones, we lose inshore area coverage. We might be able to remedy this by intersecting with the landmass to filter out any points on land.
+# I also can't seem to re-run it without it hanging up)
 ## Save out ----
 write_csv(vtr_crop, here("data","processed","vessel_trip_reports.csv"))
