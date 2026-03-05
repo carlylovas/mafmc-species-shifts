@@ -51,7 +51,7 @@ catch_haul |>
   filter(!is.na(gis_latsbeg) & !gis_latsbeg == 1 & (is.na(gis_lathbeg))) |>
   select(!c(gis_lathbeg, gis_lonhbeg)) |>
   rename(lat = gis_latsbeg,
-         lon = gis_lonsbeg) -> set_lats # evidently, these are all rod and reel?
+         lon = gis_lonsbeg) -> set_lats 
 
 catch_haul |>
   filter(!link3 %in% set_lats$link3) |>
